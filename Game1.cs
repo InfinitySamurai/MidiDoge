@@ -2,6 +2,11 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using System.Linq;
+using Commons.Music.Midi;
+using System;
+using System.Collections.Generic;
+
 namespace midiGame
 {
     /// <summary>
@@ -9,13 +14,38 @@ namespace midiGame
     /// </summary>
     public class Game1 : Game
     {
+        int windowWidth = 480;
+        int windowHeight = 800;
+
+        int widthMiddle;
+
+        float spawnArc = 90f;
+        float middleMidiValue = 70f;
+        float midiMaxRange = 30f;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        
+        GameObject ball;
+        MidiPlayer midiPlayer;
+        MidiMusic midiMusic;
+
+        Texture2D ballTexture;
+        List<GameObject> gameObjects = new List<GameObject>();
+        List<GameObject> objectsToAdd = new List<GameObject>();
+
+        private double DegreeToRad(double d)
+        {
+            return d * Math.PI / 180.0;
+        }
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            widthMiddle = this.windowWidth / 2;
+
+
         }
 
         /// <summary>
@@ -28,7 +58,38 @@ namespace midiGame
         {
             // TODO: Add your initialization logic here
 
+            graphics.PreferredBackBufferWidth = this.windowWidth;
+            graphics.PreferredBackBufferHeight = this.windowHeight;
+            graphics.ApplyChanges();
+
+
             base.Initialize();
+            ball = new GameObject(Content.Load<Texture2D>("ball"), new Vector2(50, 50));
+            ball.velocity = new Vector2(5, 5);
+            gameObjects.Add(ball);
+
+
+
+            var access = MidiAccessManager.Default;
+            var output = access.OpenOutputAsync(access.Outputs.Last().Id).Result;
+            midiMusic = MidiMusic.Read(System.IO.File.OpenRead("midiFiles/mz_311_1_format0.mid"));
+            midiPlayer = new MidiPlayer(midiMusic, output);
+            midiPlayer.EventReceived += (MidiEvent e) => {
+                if (e.EventType == MidiEvent.NoteOn)
+                {
+                    Console.WriteLine($"Playing note ${e.MetaType}");
+                    float rotationAmount = ((e.MetaType - this.middleMidiValue) / this.midiMaxRange) * this.spawnArc;
+                    var newNote = new GameObject(ballTexture, new Vector2(this.widthMiddle, 0));
+
+                    var defaultDirecton = new Vector2(0, 1);
+                    Convert.ToSingle(Math.Cos(this.DegreeToRad(rotationAmount)));
+                    var directionModVector = new Vector2(Convert.ToSingle(Math.Sin(this.DegreeToRad(rotationAmount))), Convert.ToSingle(Math.Cos(this.DegreeToRad(rotationAmount))));
+                    newNote.velocity = defaultDirecton + directionModVector;
+                    this.objectsToAdd.Add(newNote);
+                }
+                    
+            };
+            midiPlayer.PlayAsync();
         }
 
         /// <summary>
@@ -39,7 +100,7 @@ namespace midiGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            this.ballTexture = Content.Load<Texture2D>("ball");
             // TODO: use this.Content to load your game content here
         }
 
@@ -62,8 +123,27 @@ namespace midiGame
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            List<GameObject> objsToRemove = new List<GameObject>();
             // TODO: Add your update logic here
 
+            foreach (GameObject obj in this.objectsToAdd)
+            {
+                this.gameObjects.Add(obj);
+            }
+            this.objectsToAdd.Clear();
+
+            foreach (GameObject obj in this.gameObjects)
+            {
+                obj.Update(gameTime);
+                if(obj.position.X > 480 || obj.position.X < 0 || obj.position.Y > 800)
+                {
+                    objsToRemove.Add(obj);
+                }
+            }
+            foreach (GameObject obj in objsToRemove)
+            {
+                this.gameObjects.Remove(obj);
+            }
             base.Update(gameTime);
         }
 
@@ -76,8 +156,14 @@ namespace midiGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-
             base.Draw(gameTime);
+            spriteBatch.Begin();
+            foreach (GameObject obj in this.gameObjects) {
+                obj.Draw(spriteBatch);
+            }
+
+            spriteBatch.End();
+
         }
     }
 }
