@@ -19,7 +19,7 @@ namespace midiGame
 
         int widthMiddle;
 
-        float spawnArc = 90f;
+        float spawnArc = 45f;
         float middleMidiValue = 70f;
         float midiMaxRange = 30f;
 
@@ -72,7 +72,12 @@ namespace midiGame
 
             var access = MidiAccessManager.Default;
             var output = access.OpenOutputAsync(access.Outputs.Last().Id).Result;
-            midiMusic = MidiMusic.Read(System.IO.File.OpenRead("midiFiles/mz_311_1_format0.mid"));
+            midiMusic = MidiMusic.Read(System.IO.File.OpenRead("midiFiles/something_doin'_(nc)smythe.mid"));
+            MidiAnalyser a = new MidiAnalyser();
+            a.analyseMidi(midiMusic);
+
+            middleMidiValue = (float) a.midiMusicAverage;
+
             midiPlayer = new MidiPlayer(midiMusic, output);
             midiPlayer.EventReceived += (MidiEvent e) => {
                 if (e.EventType == MidiEvent.NoteOn)

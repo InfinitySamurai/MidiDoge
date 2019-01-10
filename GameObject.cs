@@ -40,7 +40,7 @@ namespace midiGame
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position, Color.White);
+            spriteBatch.Draw(texture, position: position, scale: new Vector2(0.5f, 0.5f));
         }
 
         public void Update(GameTime delta)
