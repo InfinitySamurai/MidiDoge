@@ -9,6 +9,8 @@ namespace midiGame
 {
     class MidiAnalyser
     {
+        private int minAllowedNoteValues = 20;
+
         public int maxNoteVal { get; private set; } = 0;
         public int minNoteVal { get; private set; } = 0;
         public double midiMusicAverage { get; private set; } = 0;
@@ -17,9 +19,13 @@ namespace midiGame
         public void analyseMidi(MidiMusic midiMusic)
         {
 
-            minNoteVal = midiMusic.Tracks.Min(track => track.Messages.Where(message => message.Event.MetaType > 0).Min(message => message.Event.MetaType));
+            minNoteVal = midiMusic.Tracks.Min(track => track.Messages.Where(message => message.Event.MetaType > minAllowedNoteValues).Min(message => message.Event.MetaType));
             maxNoteVal = midiMusic.Tracks.Max(track => track.Messages.Max(message => message.Event.MetaType));
-            midiMusicAverage = midiMusic.Tracks.Average(track => track.Messages.Average(message => message.Event.MetaType));
+            midiMusicAverage = midiMusic.Tracks.Average(track => track.Messages.Where(message => message.Event.MetaType > minAllowedNoteValues).Average(message => message.Event.MetaType));
+            //foreach(var track in midiMusic.Tracks)
+            //{
+            //    var trackAverage = track.Messages.Average(message => message.Event.MetaType);
+            //}
 
             largestDistanceFromAverage = Math.Max(midiMusicAverage - minNoteVal, maxNoteVal - midiMusicAverage);
 

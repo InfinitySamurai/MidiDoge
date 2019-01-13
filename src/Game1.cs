@@ -19,25 +19,15 @@ namespace midiGame
 
         int widthMiddle;
 
-        float spawnArc = 45f;
-        float middleMidiValue = 70f;
-        float midiMaxRange = 30f;
+        float spawnArc = 90f;
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        GameObject ball;
         MidiPlayer midiPlayer;
         MidiMusic midiMusic;
+        NoteManager noteManager;
 
         Texture2D ballTexture;
-        List<GameObject> gameObjects = new List<GameObject>();
-        List<GameObject> objectsToAdd = new List<GameObject>();
-
-        private double DegreeToRad(double d)
-        {
-            return d * Math.PI / 180.0;
-        }
-
 
         public Game1()
         {
@@ -64,33 +54,25 @@ namespace midiGame
 
 
             base.Initialize();
-            ball = new GameObject(Content.Load<Texture2D>("ball"), new Vector2(50, 50));
-            ball.velocity = new Vector2(5, 5);
-            gameObjects.Add(ball);
+            //ball = new GameObject(Content.Load<Texture2D>("ball"), new Vector2(50, 50));
+            //ball.velocity = new Vector2(5, 5);
+            //gameObjects.Add(ball);
 
 
 
             var access = MidiAccessManager.Default;
             var output = access.OpenOutputAsync(access.Outputs.Last().Id).Result;
-            midiMusic = MidiMusic.Read(System.IO.File.OpenRead("midiFiles/something_doin'_(nc)smythe.mid"));
-            MidiAnalyser a = new MidiAnalyser();
-            a.analyseMidi(midiMusic);
+            midiMusic = MidiMusic.Read(System.IO.File.OpenRead("midiFiles/Andrew_Lloyd_Webber_-_Phantom_of_the_Opera.mid"));
+            MidiAnalyser midiAnalyser = new MidiAnalyser();
+            midiAnalyser.analyseMidi(midiMusic);
 
-            middleMidiValue = (float) a.midiMusicAverage;
+            noteManager = new NoteManager(new GameObject(ballTexture, new Vector2(this.widthMiddle, 0)), spawnArc, midiAnalyser, widthMiddle, 200, 800);
 
             midiPlayer = new MidiPlayer(midiMusic, output);
-            midiPlayer.EventReceived += (MidiEvent e) => {
-                if (e.EventType == MidiEvent.NoteOn)
+            midiPlayer.EventReceived += (MidiEvent midiEvent) => {
+                if (midiEvent.EventType == MidiEvent.NoteOn)
                 {
-                    Console.WriteLine($"Playing note ${e.MetaType}");
-                    float rotationAmount = ((e.MetaType - this.middleMidiValue) / this.midiMaxRange) * this.spawnArc;
-                    var newNote = new GameObject(ballTexture, new Vector2(this.widthMiddle, 0));
-
-                    var defaultDirecton = new Vector2(0, 1);
-                    Convert.ToSingle(Math.Cos(this.DegreeToRad(rotationAmount)));
-                    var directionModVector = new Vector2(Convert.ToSingle(Math.Sin(this.DegreeToRad(rotationAmount))), Convert.ToSingle(Math.Cos(this.DegreeToRad(rotationAmount))));
-                    newNote.velocity = defaultDirecton + directionModVector;
-                    this.objectsToAdd.Add(newNote);
+                    noteManager.addNote(midiEvent);
                 }
                     
             };
@@ -131,25 +113,27 @@ namespace midiGame
             List<GameObject> objsToRemove = new List<GameObject>();
             // TODO: Add your update logic here
 
-            foreach (GameObject obj in this.objectsToAdd)
-            {
-                this.gameObjects.Add(obj);
-            }
-            this.objectsToAdd.Clear();
+            noteManager.update(gameTime);
 
-            foreach (GameObject obj in this.gameObjects)
-            {
-                obj.Update(gameTime);
-                if(obj.position.X > 480 || obj.position.X < 0 || obj.position.Y > 800)
-                {
-                    objsToRemove.Add(obj);
-                }
-            }
-            foreach (GameObject obj in objsToRemove)
-            {
-                this.gameObjects.Remove(obj);
-            }
-            base.Update(gameTime);
+            //foreach (GameObject obj in this.objectsToAdd)
+            //{
+            //    this.gameObjects.Add(obj);
+            //}
+            //this.objectsToAdd.Clear();
+
+            //foreach (GameObject obj in this.gameObjects)
+            //{
+            //    obj.Update(gameTime);
+            //    if(obj.position.X > 480 || obj.position.X < 0 || obj.position.Y > 800)
+            //    {
+            //        objsToRemove.Add(obj);
+            //    }
+            //}
+            //foreach (GameObject obj in objsToRemove)
+            //{
+            //    this.gameObjects.Remove(obj);
+            //}
+            //base.Update(gameTime);
         }
 
         /// <summary>
@@ -163,10 +147,7 @@ namespace midiGame
             // TODO: Add your drawing code here
             base.Draw(gameTime);
             spriteBatch.Begin();
-            foreach (GameObject obj in this.gameObjects) {
-                obj.Draw(spriteBatch);
-            }
-
+            noteManager.draw(spriteBatch);
             spriteBatch.End();
 
         }

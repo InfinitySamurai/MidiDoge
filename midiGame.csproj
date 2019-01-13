@@ -43,10 +43,12 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Game1.cs" />
-    <Compile Include="GameObject.cs" />
-    <Compile Include="MidiAnalyser.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="src\Game1.cs" />
+    <Compile Include="src\GameObject.cs" />
+    <Compile Include="src\Helper.cs" />
+    <Compile Include="src\MidiAnalyser.cs" />
+    <Compile Include="src\NoteManager.cs" />
+    <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +119,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="midiFiles\Andrew_Lloyd_Webber_-_Phantom_of_the_Opera.mid">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="midiFiles\dance_time.mid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
