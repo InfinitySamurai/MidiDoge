@@ -87,7 +87,7 @@ namespace midiGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            this.ballTexture = Content.Load<Texture2D>("ball");
+            this.ballTexture = Content.Load<Texture2D>("note");
             // TODO: use this.Content to load your game content here
         }
 

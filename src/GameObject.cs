@@ -15,6 +15,8 @@ namespace midiGame
         public Vector2 position { get; set; }
         public Vector2 velocity { get; set; } = new Vector2(0, 0);
         public Texture2D texture;
+        private float rotationSpeed = Helper.randomFloatInRange(-0.1f, 0.1f);
+        private float rotation = 0;
 
         public GameObject(Texture2D texture, Vector2 position)
         {
@@ -30,13 +32,12 @@ namespace midiGame
             }
         }
 
-        public Vector2 getCentre
+        public Vector2 getCentrePosition
         {
-            get
-            {
-                return new Vector2(position.X + texture.Width / 2, position.Y + texture.Height / 2);
-            }
+            get { return new Vector2(position.X + texture.Width / 2, position.Y + texture.Height / 2); }
         }
+
+        public Vector2 getCentreSprite { get { return new Vector2(texture.Width / 2, texture.Height / 2); } }
 
         public GameObject clone()
         {
@@ -47,12 +48,13 @@ namespace midiGame
 
         public virtual void draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position: position, scale: new Vector2(0.5f, 0.5f));
+            spriteBatch.Draw(texture, position: position, scale: new Vector2(0.5f, 0.5f), rotation: this.rotation, origin: getCentreSprite);
         }
 
         public void update(GameTime gameTime)
         {
-            this.position += velocity;
+            position += velocity;
+            rotation += rotationSpeed;
         }
     }
 }
