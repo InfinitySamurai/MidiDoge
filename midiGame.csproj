@@ -43,11 +43,13 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\InputManager.cs" />
     <Compile Include="src\Game1.cs" />
     <Compile Include="src\GameObject.cs" />
     <Compile Include="src\Helper.cs" />
     <Compile Include="src\MidiAnalyser.cs" />
     <Compile Include="src\NoteManager.cs" />
+    <Compile Include="src\Player.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

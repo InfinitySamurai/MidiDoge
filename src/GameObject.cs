@@ -15,8 +15,8 @@ namespace midiGame
         public Vector2 position { get; set; }
         public Vector2 velocity { get; set; } = new Vector2(0, 0);
         public Texture2D texture;
-        private float rotationSpeed = Helper.randomFloatInRange(-0.1f, 0.1f);
-        private float rotation = 0;
+        public float rotationSpeed { get; set; } = 0;
+        public float rotation { get; set; } = 0;
 
         public GameObject(Texture2D texture, Vector2 position)
         {
